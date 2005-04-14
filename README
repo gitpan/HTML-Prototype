@@ -1,0 +1,50 @@
+NAME
+    HTML::Prototype - Generate HTML and Javascript for the Prototype library
+
+SYNOPSIS
+        use HTML::Prototype;
+
+        my $prototype = HTML::Prototype->new;
+        print $prototype->define_javascript_functions;
+        print $prototype->form_remote_tag(...);
+        print $prototype->link_to_function(...);
+        print $prototype->link_to_remote(...);
+        print $prototype->observe_field(...);
+        print $prototype->observe_form(...);
+
+DESCRIPTION
+    Some code generators for Prototype, the famous JavaScript oo library.
+
+  METHODS
+   $prototype->define_javascript_functions
+    Returns our library of Javascript functions and objects, in a script
+    block.
+
+   $prototype->form_remote_tag()
+    Create open form tag using ajax instead of POST.
+
+   $prototype->link_to_function()
+    Link to a function.
+
+   $prototype->link_to_remote()
+    Link to a remote function.
+
+   $prototype->observe_field()
+    Observe a form field.
+
+   $prototype->observe_form()
+    Observe a form.
+
+SEE ALSO
+    Catalyst::Plugin::Prototype, Catalyst.
+
+AUTHOR
+    Sebastian Riedel, "sri@oook.de"
+
+    Built around Prototype by Sam Stephenson. Much code is ported from Ruby
+    on Rails javascript helpers.
+
+LICENSE
+    This library is free software . You can redistribute it and/or modify it
+    under the same terms as perl itself.
+
