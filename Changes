@@ -1,4 +1,6 @@
 Revision history for Perl extension HTML::Prototype
 
+1.11  Sat Apr 15 15:55:00 2005
+        - fixed typo in link_to_remote (Numa)
 1.10  Wed Apr 14 12:00:00 2005
         - original version.

@@ -3,7 +3,7 @@ package HTML::Prototype;
 use strict;
 use base 'Class::Accessor::Fast';
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 our $prototype = do { local $/; <DATA> };
 my $callbacks = [qw/loading loaded interactive complete/];
 
@@ -143,7 +143,7 @@ you can specify $options->{type} = 'synchronous'.
 
 sub link_to_remote {
     my ( $self, $id, $options ) = @_;
-    $self->link_to_function( $id, remote_function($options) );
+    $self->link_to_function( $id, _remote_function($options) );
 }
 
 =head3 $prototype->observe_field( $id, \%options)
