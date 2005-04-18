@@ -1,6 +1,10 @@
 Revision history for Perl extension HTML::Prototype
 
-1.11  Sat Apr 15 15:55:00 2005
-        - fixed typo in link_to_remote (Numa)
+1.20  Mon Apr 18 23:00:00 2005
+        - updated to Prototype 1.20
+
+1.11  Sun Apr 17 15:00:00 2005
+        - s/remote_function/_remote_function/ (Leon Brocard)
+
 1.10  Wed Apr 14 12:00:00 2005
         - original version.
