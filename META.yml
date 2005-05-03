@@ -1,6 +1,6 @@
 ---
 name: HTML-Prototype
-version: 1.21
+version: 1.22
 author:
   - |-
     Sebastian Riedel, C<sri@oook.de>
@@ -12,5 +12,5 @@ requires:
 provides:
   HTML::Prototype:
     file: lib/HTML/Prototype.pm
-    version: 1.21
+    version: 1.22
 generated_by: Module::Build version 0.26

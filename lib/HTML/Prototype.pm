@@ -3,7 +3,7 @@ package HTML::Prototype;
 use strict;
 use base 'Class::Accessor::Fast';
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 use HTML::Prototype::Js;
 our $prototype = do { package HTML::Prototype::Js; local $/; <DATA> };
 my $callbacks = [qw/uninitialized loading loaded interactive complete/];
