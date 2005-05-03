@@ -1,11 +1,16 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         HTML-Prototype
-version:      1.20
-version_from: Prototype.pm
-installdirs:  site
+---
+name: HTML-Prototype
+version: 1.21
+author:
+  - |-
+    Sebastian Riedel, C<sri@oook.de>
+    Marcus Ramberg, C<mramberg@cpan.org>
+abstract: Generate HTML and Javascript for the Prototype library
+license: perl
 requires:
-    Class::Accessor::Fast:         0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+  Class::Accessor::Fast: 0
+provides:
+  HTML::Prototype:
+    file: lib/HTML/Prototype.pm
+    version: 1.21
+generated_by: Module::Build version 0.26

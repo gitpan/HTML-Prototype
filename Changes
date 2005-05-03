@@ -1,5 +1,10 @@
 Revision history for Perl extension HTML::Prototype
 
+1.22  Xxx Xxx XX XX:XX:00 2005
+        - minor doc fix
+1.21  Wed Apr 20 23:00:00 2005
+        - updated to Prototype 1.21
+
 1.20  Mon Apr 18 23:00:00 2005
         - updated to Prototype 1.20
 
