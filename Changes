@@ -1,5 +1,12 @@
 Revision history for Perl extension HTML::Prototype
 
+1.30  Thu Jul 07 10:00:00 2005
+        - updated to prototype.js 1.30
+        - added script.aculo.us extensions
+        - added controls.js for auto_completion
+        - added docs for js syntax additions.
+        - updated documentation.
+
 1.23  Tue May 03 17:02:00 2005
         - updated MANIFEST to include missing files.
 1.22  Tue May 03 17:02:00 2005
