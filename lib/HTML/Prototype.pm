@@ -3,7 +3,7 @@ package HTML::Prototype;
 use strict;
 use base 'Class::Accessor::Fast';
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -714,11 +714,22 @@ sub _build_callbacks {
 sub _build_observer {
     my ( $self, $class, $name, $options ) = @_;
     $options->{with} ||= 'value' if $options->{update};
-    my $freq = $options->{frequency} || 2;
+    my $freq = $options->{frequency};
     my $callback = _remote_function($options);
-    return $self->javascript_tag(<<"");
-new $class( '$name', $freq, function( element, value ) { $callback } );
-
+       if ( $freq ) {
+          return $self->javascript_tag(
+              "new $class( '$name', 
+                           $freq, 
+                           function( element, value ) { 
+                               $callback 
+                            } );");
+       } else {
+          return $self->javascript_tag(
+              "new $class( '$name', 
+                           function( element, value ) { 
+                               $callback 
+                            } );");
+       }
 }
 
 sub _options_for_ajax {
@@ -743,7 +754,7 @@ sub _options_for_ajax {
 sub _options_for_javascript {
     my $options = shift;
     my @options;
-    for my $key (%$options) {
+    for my $key ( keys %$options ) {
         my $value = $options->{$key};
         push @options, "$key: $value";
     }

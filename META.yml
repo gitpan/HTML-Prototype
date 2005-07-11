@@ -1,6 +1,6 @@
 ---
 name: HTML-Prototype
-version: 1.30
+version: 1.31
 author:
   - |-
     Sebastian Riedel, C<sri@oook.de>
@@ -12,7 +12,7 @@ requires:
 provides:
   HTML::Prototype:
     file: lib/HTML/Prototype.pm
-    version: 1.30
+    version: 1.31
   HTML::Prototype::Controls:
     file: lib/HTML/Prototype/Controls.pm
   HTML::Prototype::DragDrop:
@@ -21,4 +21,4 @@ provides:
     file: lib/HTML/Prototype/Effects.pm
   HTML::Prototype::Js:
     file: lib/HTML/Prototype/Js.pm
-generated_by: Module::Build version 0.2611
+generated_by: Module::Build version 0.26
