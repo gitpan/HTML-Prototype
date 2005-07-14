@@ -1,5 +1,10 @@
 Revision history for Perl extension HTML::Prototype
 
+1.32  Mon Jul 12 13:40:00 2005
+        - Updated js files
+        - Fixed bug in sortable_element
+        - added auto_complete_stylesheet
+
 1.31  Mon Jul 11 13:40:00 2005
         - Updated to script-aculo.us 1.0
         - Update to prototype 1.3.1

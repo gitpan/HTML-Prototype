@@ -1,9 +1,10 @@
 package HTML::Prototype;
 
 use strict;
-use base 'Class::Accessor::Fast';
+use base qw/Class::Accessor::Fast/;
+use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-our $VERSION = '1.31';
+$VERSION = '1.32';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -11,10 +12,10 @@ use HTML::Prototype::Controls;
 use HTML::Prototype::DragDrop;
 use HTML::Prototype::Effects;
 
-our $prototype = do { package HTML::Prototype::Js;       local $/; <DATA> };
-our $controls  = do { package HTML::Prototype::Controls; local $/; <DATA> };
-our $dragdrop  = do { package HTML::Prototype::DragDrop; local $/; <DATA> };
-our $effects   = do { package HTML::Prototype::Effects;  local $/; <DATA> };
+$prototype = do { package HTML::Prototype::Js;       local $/; <DATA> };
+$controls  = do { package HTML::Prototype::Controls; local $/; <DATA> };
+$dragdrop  = do { package HTML::Prototype::DragDrop; local $/; <DATA> };
+$effects   = do { package HTML::Prototype::Effects;  local $/; <DATA> };
 
 my $callbacks    = [qw/uninitialized loading loaded interactive complete/];
 my $ajax_options = [qw/url asynchronous method insertion form with/];
@@ -30,6 +31,7 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
     my $prototype = HTML::Prototype->new;
     print $prototype->auto_complete_field(...);
     print $prototype->auto_complete_result(...);
+    print $prototype->auto_complete_stylesheet(...);
     print $prototype->content_tag(...);
     print $prototype->define_javascript_functions;
     print $prototype->draggable_element(...);
@@ -130,6 +132,41 @@ sub auto_complete_result {
         push @elements, HTML::Element->new('li')->push_content($item);
     }
     return HTML::Element->new('ul')->push_content(@elements)->as_HTML;
+}
+
+=item $prototype->auto_complete_stylesheet
+
+Returns the auto_complete stylesheet.
+
+=cut
+
+sub auto_complete_stylesheet {
+    my $self = shift;
+    return $self->content_tag( 'style', <<"");
+    div.auto_complete {
+        width: 350px;
+        background: #fff;
+    }
+    div.auto_complete ul {
+        border:1px solid #888;
+        margin:0;
+        padding:0;
+        width:100%;
+        list-style-type:none;
+    }
+    div.auto_complete ul li {
+        margin:0;
+        padding:3px;
+    }
+    div.auto_complete ul li.selected { 
+        background-color: #ffb; 
+    }
+    div.auto_complete ul strong.highlight { 
+        color: #800; 
+        margin:0;
+        padding:0;
+    }
+
 }
 
 =item $prototype->content_tag( $name, $content, \%html_options )
@@ -284,6 +321,9 @@ See http://script.aculo.us for more documentation.
 sub drop_receiving_element {
     my ( $self, $element_id, $options ) = @_;
     $options           ||= {};
+	# needs a hoverclass if it is to function! 
+	# FIXME probably a bug in scriptaculous!
+	$options->{hoverclass} ||= 'hoversmocherpocher';
     $options->{with}   ||= "'id=' + encodeURIComponent(element.id)";
     $options->{onDrop} ||=
       "function(element){" . _remote_function($options) . "}";
@@ -735,7 +775,7 @@ sub _build_observer {
 sub _options_for_ajax {
     my $options    = shift;
     my $js_options = _build_callbacks($options);
-    $options->{type} ||= '';
+    $options->{type} ||= "''";
     $js_options->{asynchronous} = $options->{type} eq 'synchronous' ? 0 : 1;
     $js_options->{method} = $options->{method} if $options->{method};
     my $position = $options->{position};
@@ -758,7 +798,7 @@ sub _options_for_javascript {
         my $value = $options->{$key};
         push @options, "$key: $value";
     }
-    return '{ ' . join( ', ', @options ) . ' }';
+    return '{ ' . join( ', ', sort(@options) ) . ' }';
 }
 
 sub _remote_function {
@@ -795,7 +835,7 @@ Much code is ported from Ruby on Rails javascript helpers.
 
 =head1 THANK YOU
 
-Drew Taylor, Leon Brocard
+Drew Taylor, Leon Brocard, Andreas Marienborg
 
 =head1 LICENSE
 
@@ -805,3 +845,4 @@ the same terms as perl itself.
 =cut
 
 1;
+## Please see file perltidy.ERR
