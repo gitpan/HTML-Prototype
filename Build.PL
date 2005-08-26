@@ -6,7 +6,8 @@ my $build = Module::Build->new(
     license            => 'perl',
     module_name        => 'HTML::Prototype',
     requires           => {
-      'Class::Accessor::Fast' => 0 
+      'Class::Accessor::Fast' => 0,
+	  'HTML::Tree' => 0
     },
     create_makefile_pl => 'passthrough',
     create_readme => 1,

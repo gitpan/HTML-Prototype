@@ -1,5 +1,9 @@
 Revision history for Perl extension HTML::Prototype
 
+1.33  Fri Aug 26 11:00:00 2005
+        - Added auto_complete_stylesheet
+        - Improved description (dstorrs)
+        - Missing dependency on HTML::Tree
 1.32  Mon Jul 12 13:40:00 2005
         - Updated js files
         - Fixed bug in sortable_element

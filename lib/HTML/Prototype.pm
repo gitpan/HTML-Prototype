@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.32';
+$VERSION = '1.33';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -52,11 +52,13 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
 
 =head1 DESCRIPTION
 
-Some code generators for Prototype, the famous JavaScript OO library
-and the script.aculous extensions.
 
-This library allows you to do Ajax without writing lots of JavaScript 
-code.
+The module contains some code generators for Prototype, the famous JavaScript 
+OO library and the script.aculous extensions.
+
+The Prototype library (http://prototype.conio.net/) is designed to make 
+AJAX easy.  Catalyst::Plugin::Prototype makes it easy to connect to the 
+Prototype library.
 
 This is mostly a port of the Ruby on Rails helper tags for JavaScript
 for use in L<Catalyst>.
