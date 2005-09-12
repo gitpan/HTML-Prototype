@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: HTML-Prototype
-version: 1.33
+version: 1.34
 author:
   - Sebastian Riedel, C<sri@oook.de>
 Marcus Ramberg, C<mramberg@cpan.org>

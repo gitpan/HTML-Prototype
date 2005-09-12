@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.33';
+$VERSION = '1.34';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -780,6 +780,8 @@ sub _options_for_ajax {
     $options->{type} ||= "''";
     $js_options->{asynchronous} = $options->{type} eq 'synchronous' ? 0 : 1;
     $js_options->{method} = $options->{method} if $options->{method};
+    $js_options->{evalScripts} = $options->{evalScripts} ;
+    $js_options->{postBody} = $options->{postBody};
     my $position = $options->{position};
     $js_options->{insertion} = "Insertion.$position" if $position;
     if ( $options->{form} ) {
