@@ -4,13 +4,14 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.35';
+$VERSION = '1.36';
 
 use HTML::Element;
 use HTML::Prototype::Js;
 use HTML::Prototype::Controls;
 use HTML::Prototype::DragDrop;
 use HTML::Prototype::Effects;
+use HTML::Prototype::Helper;
 
 $prototype = do { package HTML::Prototype::Js;       local $/; <DATA> };
 $controls  = do { package HTML::Prototype::Controls; local $/; <DATA> };
@@ -38,6 +39,8 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
     print $prototype->drop_receiving_element(...);
     print $prototype->evaluate_remote_response(...);
     print $prototype->form_remote_tag(...);
+    print $prototype->in_place_editor(...);
+    print $prototype->in_place_editor_field(...);
     print $prototype->javascript_tag(...);
     print $prototype->link_to_function(...);
     print $prototype->link_to_remote(...);
@@ -47,17 +50,17 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
     print $prototype->sortable_element(...);
     print $prototype->submit_to_remote(...);
     print $prototype->tag(...);
+    print $prototype->text_field_with_auto_complete(...);
     print $ptototype->update_element_function(...);
     print $prototype->visual_effect(...);
 
 =head1 DESCRIPTION
 
-
-The module contains some code generators for Prototype, the famous JavaScript 
+The module contains some code generators for Prototype, the famous JavaScript
 OO library and the script.aculous extensions.
 
-The Prototype library (http://prototype.conio.net/) is designed to make 
-AJAX easy.  Catalyst::Plugin::Prototype makes it easy to connect to the 
+The Prototype library (http://prototype.conio.net/) is designed to make
+AJAX easy.  Catalyst::Plugin::Prototype makes it easy to connect to the
 Prototype library.
 
 This is mostly a port of the Ruby on Rails helper tags for JavaScript
@@ -67,19 +70,112 @@ for use in L<Catalyst>.
 
 =over 4
 
+=item $prototype->in_place_editor( $field_id, \%options )
+
+Makes an HTML element specified by the DOM ID C<$field_id> become an in-place
+editor of a property.
+
+A form is automatically created and displayed when the user clicks the element,
+something like this:
+
+	<form id="myElement-in-place-edit-form" target="specified url">
+		<input name="value" text="The content of myElement"/>
+		<input type="submit" value="ok"/>
+		<a onClick="javascript to cancel the editing">cancel</a>
+	</form>
+
+The form is serialized and sent to the server using an Ajax call, the action
+on the server should process the value and return the updated value in the
+body of the reponse. The element will automatically be updated with the
+changed value (as returned from the server).
+
+Required options are:
+
+C<url>: Specifies the url where the updated value should be sent after the
+user presses "ok".
+
+Addtional options are:
+
+C<rows>: Number of rows (more than 1 will use a TEXTAREA)
+
+C<cancel_text>: The text on the cancel link. (default: "cancel")
+
+C<save_text>: The text on the save link. (default: "ok")
+
+C<external_control>: The id of an external control used to enter edit mode.
+
+C<options>: Pass through options to the AJAX call (see prototype's Ajax.Updater)
+
+C<with>: JavaScript snippet that should return what is to be sent in the
+Ajax call, C<form> is an implicit parameter
+
+=cut
+
+sub in_place_editor {
+    my ( $self, $id, $options ) = @_;
+
+    my %to_options = (
+        'cancel_text'      => 'cancelText',
+        'save_text'        => 'okText',
+        'rows'             => 'rows',
+        'external_control' => 'externalControl',
+        'ajax_options'     => 'ajaxOptions',
+    );
+
+    my $function = "new Ajax.InPlaceEditor( '$id', '" . $options->{url} . "'";
+
+    my $js_options = {};
+    while ( my ( $key, $js_key ) = each %to_options ) {
+        $js_options->{$js_key} = $options->{$key} if $options->{$key};
+    }
+    $js_options->{callback} =
+      ( 'function ( form ) { return ' . $options->{with} . ' }' )
+      if $options->{with};
+
+    $function .= ',' . _options_for_javascript($js_options)
+      if keys %{$js_options};
+    $function .= ')';
+
+    return $self->javascript_tag($function);
+}
+
+=item $prototype->in_place_editor_field( $object, $method, \%tag_options, \%in_place_editor_options )
+
+Renders the value of the specified object and method with in-place editing capabilities.
+
+=cut
+
+sub in_place_editor_field {
+    my ( $self, $object, $method, $tag_options, $in_place_editor_options ) = @_;
+
+    $tag_options             ||= {};
+    $in_place_editor_options ||= {};
+
+    my $tag = HTML::Prototype::Helper::Tag->new( $object, $method, $self );
+    $tag_options = {
+        tag   => 'span',
+        id    => "$object\_$method\_" . $tag->object->id . '_in_place_editor',
+        class => 'in_place_editor_field',
+        %{$tag_options},
+    };
+
+    return $tag->to_content_tag( delete $tag_options->{tag}, $tag_options )
+      . $self->in_place_editor( $tag_options->{id}, $in_place_editor_options );
+}
+
 =item $prototype->auto_complete_field( $field_id, \%options )
 
 Adds Ajax autocomplete functionality to the text input field with the
-DOM ID specified by C<field_id>.
+DOM ID specified by C<$field_id>.
 
 This function expects that the called action returns a HTML <ul> list,
 or nothing if no entries should be displayed for autocompletion.
- 
+
 Required options are:
 
 C<url>: Specifies the URL to be used in the AJAX call.
 
- 
+
 Addtional options are:
 
 C<update>: Specifies the DOM ID of the element whose  innerHTML should
@@ -92,28 +188,76 @@ This defaults to 'value', which in the evaluated context refers to the
 new field value.
 
 C<indicator>: Specifies the DOM ID of an elment which will be displayed
+Here's an example using L<Catalyst::View::Mason> with an indicator against the auto_complete_result example below on the server side.  Notice the 'style="display:none"' in the indicator <span>.
+
+	<% $c->prototype->define_javascript_functions %>
+
+	<form action="/bar" method="post" id="baz">
+	<fieldset>
+        	<legend>Type search terms</legend>
+        	<label for="acomp"><span class="field">Search:</span></label>
+        	<input type="text" name="acomp" id="acomp"/>
+		<span style="display:none" id="acomp_stat">Searching...</span><br />
+	</fieldset>
+	</form>
+
+        <span id="acomp_auto_complete"></span><br/>
+
+	<% $c->prototype->auto_complete_field( 'acomp', { url => '/autocomplete', indicator => 'acomp_stat' } ) %>
+
 while autocomplete is running.
+
+C<tokens>: A  string or an array of strings containing separator tokens for
+tokenized incremental autocompletion. Example: C<<tokens => ','>> would
+allow multiple autocompletion entries, separated by commas.
+
+C<min_chars>: The minimum number of characters that should be in the input
+field before an Ajax call is made to the server.
+
+C<on_hide>: A Javascript expression that is called when the autocompletion
+div is hidden. The expression should take two variables: element and update.
+Element is a DOM element for the field, update is a DOM element for the div
+from which the innerHTML is replaced.
+
+C<on_show>: Like on_hide, only now the expression is called then the div
+is shown.
 
 =cut
 
 sub auto_complete_field {
     my ( $self, $id, $options ) = @_;
+    my %to_options = (
+        'on_show'   => 'onShow',
+        'on_hide'   => 'onHide',
+        'min_chars' => 'min_chars',
+    );
     $options ||= {};
     my $update = $options->{update} || "$id" . '_auto_complete';
     my $function =
       "new Ajax.Autocompleter( '$id', '$update', '" . $options->{url} . "'";
 
     my $js_options = {};
+    $js_options->{tokens} =
+      _array_or_string_for_javascript( $options->{tokens} )
+      if $options->{tokens};
     $js_options->{callback} =
       ( 'function ( element, value ) { return ' . $options->{with} . ' }' )
       if $options->{with};
     $js_options->{indicator} = ( "'" . $options->{indicator} . "'" )
       if $options->{indicator};
-    $function .= ',' . _options_for_javascript($js_options) . ')';
-    $self->javascript_tag($function);
+
+    while ( my ( $key, $js_key ) = each %to_options ) {
+        $js_options->{$js_key} = $options->{$key} if $options->{$key};
+    }
+
+    $function .= ', ' . _options_for_javascript($js_options)
+      if keys %{$js_options};
+    $function .= ' )';
+
+    return $self->javascript_tag($function);
 }
 
-=item $prototype->auto_complete_result(\@items)
+=item $prototype->auto_complete_result(\@items, $fieldname, [$phrase])
 
 Returns a list, to communcate with the Autocompleter.
 
@@ -128,12 +272,55 @@ Here's an example for L<Catalyst>:
 =cut
 
 sub auto_complete_result {
-    my ( $self, $items ) = @_;
+    my ( $self, $entries, $field, $phrase ) = @_;
     my @elements;
-    for my $item (@$items) {
+    for my $entry ( @{$entries} ) {
+        my $item;
+        if ( ref($entry) eq 'HASH' ) {
+            my $e = $entry->{$field};
+            $item = $phrase ? _highlight( $e, $phrase ) : $e;
+        }
+        else {
+            $item = $entry;
+        }
         push @elements, HTML::Element->new('li')->push_content($item);
     }
-    return HTML::Element->new('ul')->push_content(@elements)->as_HTML;
+    return HTML::Element->new('ul')->push_content( _unique(@elements) )
+      ->as_HTML('<>&');
+}
+
+=item $prototype->text_field_with_auto_complete($method, [\%tag_options], [\%completion_options])
+
+Wrapper for text_field with added Ajax autocompletion functionality.
+
+In your controller, you'll need to define an action called
+auto_complete_for_object_method to respond the AJAX calls,
+
+=cut
+
+sub text_field_with_auto_complete {
+    my ( $self, $object, $method, $tag_options, $completion_options ) = @_;
+
+    $tag_options        ||= {};
+    $completion_options ||= {};
+
+    my $style =
+      $completion_options->{skip_style}
+      ? ''
+      : $self->auto_complete_stylesheet();
+    my $text_field = $self->text_field( $object, $method, $tag_options );
+    my $content_tag =
+      $self->content_tag( 'div', '',
+        { id => "$object\_$method\_auto_complete", class => 'auto_complete' } );
+    my $auto_complete_field = $self->auto_complete_field(
+        "$object\_$method",
+        {
+            url => { action => "auto_complete_for_$object\_$method" },
+            %{$completion_options}
+        }
+    );
+
+    return $style . $text_field . $content_tag . $auto_complete_field;
 }
 
 =item $prototype->auto_complete_stylesheet
@@ -160,11 +347,11 @@ sub auto_complete_stylesheet {
         margin:0;
         padding:3px;
     }
-    div.auto_complete ul li.selected { 
-        background-color: #ffb; 
+    div.auto_complete ul li.selected {
+        background-color: #ffb;
     }
-    div.auto_complete ul strong.highlight { 
-        color: #800; 
+    div.auto_complete ul strong.highlight {
+        color: #800;
         margin:0;
         padding:0;
     }
@@ -182,10 +369,26 @@ B<'img'>.
 
 sub content_tag {
     my ( $self, $name, $content, $html_options ) = @_;
+
+    return HTML::Prototype::Helper::Tag->_content_tag( $name, $content,
+        $html_options );
+}
+
+=item $prototype->text_field( $name, $method, $html_options )
+
+Returns an input tag of the "text" type tailored for accessing a specified
+attribute (identified by I<$method>) on an object assigned to the template
+(identified by I<$object>). Additional options on the input tag can be passed
+as a hash ref with I<$html_options>.
+
+=cut
+
+sub text_field {
+    my ( $self, $object_name, $method, $html_options ) = @_;
     $html_options ||= {};
-    my $tag = HTML::Element->new( $name, %$html_options );
-    $tag->push_content($content);
-    return $tag->as_HTML;
+    return HTML::Prototype::Helper::Tag->new( $object_name, $method, $self,
+        undef, delete $html_options->{object} )
+      ->to_input_field_tag( "input", $html_options );
 }
 
 =item $prototype->define_javascript_functions
@@ -322,12 +525,13 @@ See http://script.aculo.us for more documentation.
 
 sub drop_receiving_element {
     my ( $self, $element_id, $options ) = @_;
-    $options           ||= {};
-	# needs a hoverclass if it is to function! 
-	# FIXME probably a bug in scriptaculous!
-	$options->{hoverclass} ||= 'hoversmocherpocher';
-    $options->{with}   ||= "'id=' + encodeURIComponent(element.id)";
-    $options->{onDrop} ||=
+    $options ||= {};
+
+    # needs a hoverclass if it is to function!
+    # FIXME probably a bug in scriptaculous!
+    $options->{hoverclass} ||= 'hoversmocherpocher';
+    $options->{with}       ||= "'id=' + encodeURIComponent(element.id)";
+    $options->{onDrop}     ||=
       "function(element){" . _remote_function($options) . "}";
     for my $option ( @{$ajax_options} ) {
         delete $options->{$option};
@@ -390,7 +594,7 @@ sub javascript_tag {
     my %html_options = ( type => 'text/javascript', %$html_options );
     my $tag = HTML::Element->new( 'script', %html_options );
     $tag->push_content("\n<!--\n$content\n//-->\n");
-    return $tag->as_HTML;
+    return $tag->as_HTML('<>&');
 }
 
 =item $prototype->link_to_function( $name, $function, \%html_options )
@@ -406,10 +610,13 @@ Examples:
 =cut
 
 sub link_to_function {
-    my ( $self, $name, $function, $html_options ) = @_;
+    my ( $self, $name, $function, $html_options, $fallback ) = @_;
     $html_options ||= {};
-    my %html_options =
-      ( href => '#', onclick => "$function; return false", %$html_options );
+    my %html_options = (
+        href    => $fallback,
+        onclick => "$function; return false",
+        %$html_options
+    );
     return $self->content_tag( 'a', $name, \%html_options );
 }
 
@@ -478,7 +685,8 @@ C<after>: Called immediately after request was initiated and before C<loading>.
 
 sub link_to_remote {
     my ( $self, $id, $options, $html_options ) = @_;
-    $self->link_to_function( $id, _remote_function($options), $html_options );
+    $self->link_to_function( $id, _remote_function($options),
+        $html_options, $$options{url} );
 }
 
 =item $prototype->observe_field( $id, \%options)
@@ -588,8 +796,8 @@ element as parameters.
 Example:
     $ptototype->sortable_element( 'my_list', { url => 'http://foo.bar/baz' } );
 
-In the example, the action gets a "my_list" array parameter 
-containing the values of the ids of elements the sortable consists 
+In the example, the action gets a "my_list" array parameter
+containing the values of the ids of elements the sortable consists
 of, in the current order.
 
 You can change the behaviour with various options, see
@@ -639,11 +847,7 @@ Returns a opening tag.
 
 sub tag {
     my ( $self, $name, $options, $starttag ) = @_;
-    $starttag ||= 0;
-    $options  ||= {};
-    my $tag = HTML::Element->new( $name, %$options );
-    return $tag->starttag if $starttag;
-    return $tag->as_XML;
+    return HTML::Prototype::Helper::Tag->_tag( $name, $options, $starttag );
 }
 
 =item $prototype->update_element_function( $element_id, \%options, \&code )
@@ -678,7 +882,7 @@ Example:
     # Returning view
     $prototype->update_element_function( 'cart', {
         action   => 'update',
-        position => 'bottom', 
+        position => 'bottom',
         content  => "<p>New Product: $product_name</p>"
     } );
     $prototype->update_element_function( 'status',
@@ -756,22 +960,25 @@ sub _build_callbacks {
 sub _build_observer {
     my ( $self, $class, $name, $options ) = @_;
     $options->{with} ||= 'value' if $options->{update};
-    my $freq = $options->{frequency};
+    my $freq     = $options->{frequency};
     my $callback = _remote_function($options);
-       if ( $freq ) {
-          return $self->javascript_tag(
-              "new $class( '$name', 
-                           $freq, 
-                           function( element, value ) { 
-                               $callback 
-                            } );");
-       } else {
-          return $self->javascript_tag(
-              "new $class( '$name', 
-                           function( element, value ) { 
-                               $callback 
-                            } );");
-       }
+    if ($freq) {
+        return $self->javascript_tag(
+            "new $class( '$name',
+                           $freq,
+                           function( element, value ) {
+                               $callback
+                            } );"
+        );
+    }
+    else {
+        return $self->javascript_tag(
+            "new $class( '$name',
+                           function( element, value ) {
+                               $callback
+                            } );"
+        );
+    }
 }
 
 sub _options_for_ajax {
@@ -780,10 +987,12 @@ sub _options_for_ajax {
     $options->{type} ||= "''";
     $js_options->{asynchronous} = $options->{type} eq 'synchronous' ? 0 : 1;
     $js_options->{method} = $options->{method} if $options->{method};
-    $js_options->{evalScripts} = $options->{evalScripts} if $options->{evalScripts};
+    $js_options->{evalScripts} = $options->{evalScripts}
+      if $options->{evalScripts};
     $js_options->{postBody} = $options->{postBody} if $options->{postBody};
     my $position = $options->{position};
     $js_options->{insertion} = "Insertion.$position" if $position;
+
     if ( $options->{form} ) {
         $js_options->{parameters} = 'Form.serialize(this)';
     }
@@ -797,9 +1006,8 @@ sub _options_for_ajax {
 
 sub _options_for_javascript {
     my $options = shift;
-    my @options;
-    for my $key ( keys %$options ) {
-        my $value = $options->{$key};
+    my @options = ();
+    while ( my ( $key, $value ) = each %{$options} ) {
         push @options, "$key: $value";
     }
     return '{ ' . join( ', ', sort(@options) ) . ' }';
@@ -822,6 +1030,35 @@ sub _remote_function {
     return $function;
 }
 
+sub _array_or_string_for_javascript {
+    my $options = shift;
+    my $retval;
+    if ( ref($options) eq 'ARRAY' ) {
+        $retval = "['" . join( "','", @{$options} ) . "']";
+    }
+    else {
+        $retval = "'$options'";
+    }
+    return $retval;
+}
+
+sub _unique {
+    my %h = ();
+    return grep { !$h{$_}++ } @_;
+}
+
+sub _highlight {
+    my ( $text, $phrase, $highlighter ) = @_;
+
+    $highlighter ||= '<strong class="highlight">\1</strong>';
+    return $text unless $phrase;
+
+    $text =~
+s{(\Q$phrase\E)}{my $h = $highlighter; my $r = $1; $h =~ s/\\1/$r/g; $h}gei;
+
+    return $text;
+}
+
 =back
 
 =head1 SEE ALSO
@@ -831,6 +1068,7 @@ L<http://prototype.conio.net/>
 
 =head1 AUTHOR
 
+Sascha Kiefer, C<esskar@cpan.org>
 Sebastian Riedel, C<sri@oook.de>
 Marcus Ramberg, C<mramberg@cpan.org>
 
@@ -849,4 +1087,3 @@ the same terms as perl itself.
 =cut
 
 1;
-## Please see file perltidy.ERR

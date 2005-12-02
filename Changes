@@ -1,10 +1,14 @@
 Revision history for Perl extension HTML::Prototype
 
-1.35  Thu Sep 15 09:15:00 2005
-        -  fixed to only pass evalScripts / postBody when set.
 
-1.34  Mon Sep 12 14:21:00 2005
-        - Added support for evalScripts and postBody options.
+
+1.36  Fri Dec 02 01:55:00 2005
+        - Keep up with RoR
+        - Added HTML::Prototype::Helper.pm
+          and Added HTML::Prototype::Helper::Tag.pm for *some* reasons
+
+1.34 or 1.35
+        - Applied patches to D&D positioning.
 
 1.33  Fri Aug 26 11:00:00 2005
         - Added auto_complete_stylesheet

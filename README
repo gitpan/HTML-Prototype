@@ -14,6 +14,8 @@ SYNOPSIS
         print $prototype->drop_receiving_element(...);
         print $prototype->evaluate_remote_response(...);
         print $prototype->form_remote_tag(...);
+        print $prototype->in_place_editor(...);
+        print $prototype->in_place_editor_field(...);
         print $prototype->javascript_tag(...);
         print $prototype->link_to_function(...);
         print $prototype->link_to_remote(...);
@@ -23,6 +25,7 @@ SYNOPSIS
         print $prototype->sortable_element(...);
         print $prototype->submit_to_remote(...);
         print $prototype->tag(...);
+        print $prototype->text_field_with_auto_complete(...);
         print $ptototype->update_element_function(...);
         print $prototype->visual_effect(...);
 
@@ -38,9 +41,55 @@ DESCRIPTION
     for use in Catalyst.
 
   METHODS
+    $prototype->in_place_editor( $field_id, \%options )
+        Makes an HTML element specified by the DOM ID $field_id become an
+        in-place editor of a property.
+
+        A form is automatically created and displayed when the user clicks
+        the element, something like this:
+
+                <form id="myElement-in-place-edit-form" target="specified url">
+                        <input name="value" text="The content of myElement"/>
+                        <input type="submit" value="ok"/>
+                        <a onClick="javascript to cancel the editing">cancel</a>
+                </form>
+
+        The form is serialized and sent to the server using an Ajax call,
+        the action on the server should process the value and return the
+        updated value in the body of the reponse. The element will
+        automatically be updated with the changed value (as returned from
+        the server).
+
+        Required options are:
+
+        "url": Specifies the url where the updated value should be sent
+        after the user presses "ok".
+
+        Addtional options are:
+
+        "rows": Number of rows (more than 1 will use a TEXTAREA)
+
+        "cancel_text": The text on the cancel link. (default: "cancel")
+
+        "save_text": The text on the save link. (default: "ok")
+
+        "external_control": The id of an external control used to enter edit
+        mode.
+
+        "options": Pass through options to the AJAX call (see prototype's
+        Ajax.Updater)
+
+        "with": JavaScript snippet that should return what is to be sent in
+        the Ajax call, "form" is an implicit parameter
+
+    $prototype->in_place_editor_field( $object, $method, \%tag_options,
+    \%in_place_editor_options )
+        Renders the value of the specified object and method with in-place
+        editing capabilities.
+
     $prototype->auto_complete_field( $field_id, \%options )
         Adds Ajax autocomplete functionality to the text input field with
-        the DOM ID specified by "field_id".
+        the DOM ID specified by $field_id.
 
         This function expects that the called action returns a HTML <ul>
         list, or nothing if no entries should be displayed for
@@ -61,9 +110,46 @@ DESCRIPTION
         context refers to the new field value.
 
         "indicator": Specifies the DOM ID of an elment which will be
-        displayed while autocomplete is running.
+        displayed Here's an example using Catalyst::View::Mason with an
+        indicator against the auto_complete_result example below on the
+        server side. Notice the 'style="display:none"' in the indicator
+        <span>.
 
-    $prototype->auto_complete_result(\@items)
+                <% $c->prototype->define_javascript_functions %>
+
+                <form action="/bar" method="post" id="baz">
+                <fieldset>
+                        <legend>Type search terms</legend>
+                        <label for="acomp"><span class="field">Search:</span></label>
+                        <input type="text" name="acomp" id="acomp"/>
+                        <span style="display:none" id="acomp_stat">Searching...</span><br />
+                </fieldset>
+                </form>
+
+                <span id="acomp_auto_complete"></span><br/>
+
+                <% $c->prototype->auto_complete_field( 'acomp', { url => '/autocomplete', indicator => 'acomp_stat' } ) %>
+
+        while autocomplete is running.
+
+        "tokens": A string or an array of strings containing separator
+        tokens for tokenized incremental autocompletion. Example: "<tokens
+        =" ','>> would allow multiple autocompletion entries, separated by
+        commas.
+
+        "min_chars": The minimum number of characters that should be in the
+        input field before an Ajax call is made to the server.
+
+        "on_hide": A Javascript expression that is called when the
+        autocompletion div is hidden. The expression should take two
+        variables: element and update. Element is a DOM element for the
+        field, update is a DOM element for the div from which the innerHTML
+        is replaced.
+
+        "on_show": Like on_hide, only now the expression is called then the
+        div is shown.
+
+    $prototype->auto_complete_result(\@items, $fieldname, [$phrase])
         Returns a list, to communcate with the Autocompleter.
 
         Here's an example for Catalyst:
@@ -74,6 +160,13 @@ DESCRIPTION
                 $c->res->body( $c->prototype->auto_complete_result(\@items) );
             }
 
+    $prototype->text_field_with_auto_complete($method, [\%tag_options],
+    [\%completion_options])
+        Wrapper for text_field with added Ajax autocompletion functionality.
+
+        In your controller, you'll need to define an action called
+        auto_complete_for_object_method to respond the AJAX calls,
+
     $prototype->auto_complete_stylesheet
         Returns the auto_complete stylesheet.
 
@@ -82,6 +175,12 @@ DESCRIPTION
         for autogenerating tags like <a
         href="http://catalyst.perl.org"Catalyst Homepage</a>>. The first
         parameter is the tag name, i.e. 'a' or 'img'.
+
+    $prototype->text_field( $name, $method, $html_options )
+        Returns an input tag of the "text" type tailored for accessing a
+        specified attribute (identified by *$method*) on an object assigned
+        to the template (identified by *$object*). Additional options on the
+        input tag can be passed as a hash ref with *$html_options*.
 
     $prototype->define_javascript_functions
         Returns the library of JavaScript functions and objects, in a script
@@ -376,7 +475,7 @@ DESCRIPTION
             # Returning view
             $prototype->update_element_function( 'cart', {
                 action   => 'update',
-                position => 'bottom', 
+                position => 'bottom',
                 content  => "<p>New Product: $product_name</p>"
             } );
             $prototype->update_element_function( 'status',
@@ -398,7 +497,8 @@ SEE ALSO
     Catalyst::Plugin::Prototype, Catalyst. <http://prototype.conio.net/>
 
 AUTHOR
-    Sebastian Riedel, "sri@oook.de" Marcus Ramberg, "mramberg@cpan.org"
+    Sascha Kiefer, "esskar@cpan.org" Sebastian Riedel, "sri@oook.de" Marcus
+    Ramberg, "mramberg@cpan.org"
 
     Built around Prototype by Sam Stephenson. Much code is ported from Ruby
     on Rails javascript helpers.
