@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.36';
+$VERSION = '1.37';
 
 use HTML::Element;
 use HTML::Prototype::Js;

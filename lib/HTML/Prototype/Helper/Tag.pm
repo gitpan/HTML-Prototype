@@ -179,7 +179,7 @@ sub _content_tag {
     $html_options ||= {};
     my $tag = HTML::Element->new( $name, %$html_options );
     $tag->push_content($content);
-    return $tag->as_HTML;
+    return $tag->as_HTML('<>&');
 }
 
 =back
