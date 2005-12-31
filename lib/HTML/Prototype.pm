@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.37';
+$VERSION = '1.38';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -41,6 +41,7 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
     print $prototype->form_remote_tag(...);
     print $prototype->in_place_editor(...);
     print $prototype->in_place_editor_field(...);
+    print $prototype->in_place_editor_stylesheet(...);
     print $prototype->javascript_tag(...);
     print $prototype->link_to_function(...);
     print $prototype->link_to_remote(...);
@@ -51,7 +52,7 @@ HTML::Prototype - Generate HTML and Javascript for the Prototype library
     print $prototype->submit_to_remote(...);
     print $prototype->tag(...);
     print $prototype->text_field_with_auto_complete(...);
-    print $ptototype->update_element_function(...);
+    print $prototype->update_element_function(...);
     print $prototype->visual_effect(...);
 
 =head1 DESCRIPTION
@@ -98,9 +99,24 @@ Addtional options are:
 
 C<rows>: Number of rows (more than 1 will use a TEXTAREA)
 
+C<cols>: The number of columns the text area should span (works for both single line or multi line).
+
+C<size>: Synonym for ‘cols’ when using single-line (rows=1) input
+
 C<cancel_text>: The text on the cancel link. (default: "cancel")
 
+C<form_class_name>: CSS class used for the in place edit form. (default: "inplaceeditor-form")
+
 C<save_text>: The text on the save link. (default: "ok")
+
+C<saving_class_name>: CSS class added to the element while displaying "Saving..."
+(removed when server responds). (default: "inplaceeditor-saving")
+
+C<load_text_url>: Will cause the text to be loaded from the server (useful if
+your text is actually textile and formatted on the server)
+
+C<loading_text>: If the C<load_text_url> option is specified then this text is
+displayed while the text is being loaded from the server. (default: "Loading...")
 
 C<external_control>: The id of an external control used to enter edit mode.
 
@@ -115,11 +131,19 @@ sub in_place_editor {
     my ( $self, $id, $options ) = @_;
 
     my %to_options = (
-        'cancel_text'      => 'cancelText',
-        'save_text'        => 'okText',
-        'rows'             => 'rows',
-        'external_control' => 'externalControl',
-        'ajax_options'     => 'ajaxOptions',
+        'cancel_text'       => 'cancelText',
+        'save_text'         => 'okText',
+        'rows'              => 'rows',
+        'external_control'  => 'externalControl',
+        'ajax_options'      => 'ajaxOptions',
+        'saving_text'       => 'savingText',
+        'saving_class_name' => 'savingClassName',
+        'form_id'           => 'formId',
+        'cols'              => 'cols',
+        'size'              => 'size',
+        'load_text_url'     => 'loadTextUrl',
+        'loading_text'      => 'loadingText',
+        'form_class_name'   => 'formClassName',
     );
 
     my $function = "new Ajax.InPlaceEditor( '$id', '" . $options->{url} . "'";
@@ -161,6 +185,21 @@ sub in_place_editor_field {
 
     return $tag->to_content_tag( delete $tag_options->{tag}, $tag_options )
       . $self->in_place_editor( $tag_options->{id}, $in_place_editor_options );
+}
+
+=item $prototype->in_place_editor_stylesheet
+
+Returns the in_place_editor stylesheet.
+
+=cut
+
+sub in_place_editor_stylesheet {
+    my $self = shift;
+    return $self->content_tag( 'style', <<"");
+    .inplaceeditor-saving {
+        background: url(wait.gif) bottom right no-repeat;
+    }
+
 }
 
 =item $prototype->auto_complete_field( $field_id, \%options )
@@ -222,10 +261,16 @@ from which the innerHTML is replaced.
 C<on_show>: Like on_hide, only now the expression is called then the div
 is shown.
 
+C<select>: Pick the class of the element from which the value for
+insertion should be extracted. If this is not specified,
+the entire element is used
+
+
 =cut
 
 sub auto_complete_field {
     my ( $self, $id, $options ) = @_;
+
     my %to_options = (
         'on_show'   => 'onShow',
         'on_hide'   => 'onHide',
@@ -245,6 +290,8 @@ sub auto_complete_field {
       if $options->{with};
     $js_options->{indicator} = ( "'" . $options->{indicator} . "'" )
       if $options->{indicator};
+    $js_options->{select} = ( "'" . $options->{select} . "'" )
+      if $options->{select};
 
     while ( my ( $key, $js_key ) = each %to_options ) {
         $js_options->{$js_key} = $options->{$key} if $options->{$key};

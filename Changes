@@ -1,5 +1,12 @@
 Revision history for Perl extension HTML::Prototype
 
+1.38  Sat Dec 31 05:01:00 2005
+        - Added :select option for auto_complete_field that makes it easier
+          to only use part of the auto-complete suggestion as the value
+          for insertion
+        - Added in_place_editor_stylesheet
+        - Updated to prototype V1.4
+
 1.37  Tue Dec 27 03:26:00 2005
         - Fixed output in HTML::Prototype::Helper::Tag::_content_tag
 

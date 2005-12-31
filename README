@@ -16,6 +16,7 @@ SYNOPSIS
         print $prototype->form_remote_tag(...);
         print $prototype->in_place_editor(...);
         print $prototype->in_place_editor_field(...);
+        print $prototype->in_place_editor_stylesheet(...);
         print $prototype->javascript_tag(...);
         print $prototype->link_to_function(...);
         print $prototype->link_to_remote(...);
@@ -26,7 +27,7 @@ SYNOPSIS
         print $prototype->submit_to_remote(...);
         print $prototype->tag(...);
         print $prototype->text_field_with_auto_complete(...);
-        print $ptototype->update_element_function(...);
+        print $prototype->update_element_function(...);
         print $prototype->visual_effect(...);
 
 DESCRIPTION
@@ -69,9 +70,29 @@ DESCRIPTION
 
         "rows": Number of rows (more than 1 will use a TEXTAREA)
 
+        "cols": The number of columns the text area should span (works for
+        both single line or multi line).
+
+        "size": Synonym for ‘cols’ when using single-line (rows=1) input
+
         "cancel_text": The text on the cancel link. (default: "cancel")
 
+        "form_class_name": CSS class used for the in place edit form.
+        (default: "inplaceeditor-form")
+
         "save_text": The text on the save link. (default: "ok")
+
+        "saving_class_name": CSS class added to the element while displaying
+        "Saving..." (removed when server responds). (default:
+        "inplaceeditor-saving")
+
+        "load_text_url": Will cause the text to be loaded from the server
+        (useful if your text is actually textile and formatted on the
+        server)
+
+        "loading_text": If the "load_text_url" option is specified then this
+        text is displayed while the text is being loaded from the server.
+        (default: "Loading...")
 
         "external_control": The id of an external control used to enter edit
         mode.
@@ -86,6 +107,9 @@ DESCRIPTION
     \%in_place_editor_options )
         Renders the value of the specified object and method with in-place
         editing capabilities.
+
+    $prototype->in_place_editor_stylesheet
+        Returns the in_place_editor stylesheet.
 
     $prototype->auto_complete_field( $field_id, \%options )
         Adds Ajax autocomplete functionality to the text input field with
@@ -148,6 +172,10 @@ DESCRIPTION
 
         "on_show": Like on_hide, only now the expression is called then the
         div is shown.
+
+        "select": Pick the class of the element from which the value for
+        insertion should be extracted. If this is not specified, the entire
+        element is used
 
     $prototype->auto_complete_result(\@items, $fieldname, [$phrase])
         Returns a list, to communcate with the Autocompleter.
