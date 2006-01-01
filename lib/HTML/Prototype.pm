@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.38';
+$VERSION = '1.39';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -118,6 +118,8 @@ your text is actually textile and formatted on the server)
 C<loading_text>: If the C<load_text_url> option is specified then this text is
 displayed while the text is being loaded from the server. (default: "Loading...")
 
+C<click_to_edit_text>: The text on the click-to-edit link. (default: "click to edit")
+
 C<external_control>: The id of an external control used to enter edit mode.
 
 C<options>: Pass through options to the AJAX call (see prototype's Ajax.Updater)
@@ -131,27 +133,25 @@ sub in_place_editor {
     my ( $self, $id, $options ) = @_;
 
     my %to_options = (
-        'cancel_text'       => 'cancelText',
-        'save_text'         => 'okText',
-        'rows'              => 'rows',
-        'external_control'  => 'externalControl',
-        'ajax_options'      => 'ajaxOptions',
-        'saving_text'       => 'savingText',
-        'saving_class_name' => 'savingClassName',
-        'form_id'           => 'formId',
-        'cols'              => 'cols',
-        'size'              => 'size',
-        'load_text_url'     => 'loadTextUrl',
-        'loading_text'      => 'loadingText',
-        'form_class_name'   => 'formClassName',
+        'cancel_text'        => \'cancelText',
+        'save_text'          => \'okText',
+        'rows'               => 'rows',
+        'external_control'   => \'externalControl',
+        'ajax_options'       => 'ajaxOptions',
+        'saving_text'        => \'savingText',
+        'saving_class_name'  => \'savingClassName',
+        'form_id'            => \'formId',
+        'cols'               => 'cols',
+        'size'               => 'size',
+        'load_text_url'      => \'loadTextUrl',
+        'loading_text'       => \'loadingText',
+        'form_class_name'    => \'formClassName',
+        'click_to_edit_text' => \'clickToEditText',
     );
 
     my $function = "new Ajax.InPlaceEditor( '$id', '" . $options->{url} . "'";
 
-    my $js_options = {};
-    while ( my ( $key, $js_key ) = each %to_options ) {
-        $js_options->{$js_key} = $options->{$key} if $options->{$key};
-    }
+    my $js_options = _options_to_js_options( \%to_options, $options );
     $js_options->{callback} =
       ( 'function ( form ) { return ' . $options->{with} . ' }' )
       if $options->{with};
@@ -275,27 +275,22 @@ sub auto_complete_field {
         'on_show'   => 'onShow',
         'on_hide'   => 'onHide',
         'min_chars' => 'min_chars',
+        'indicator' => \'indicator',
+        'select'    => \'select',
     );
     $options ||= {};
-    my $update = $options->{update} || "$id" . '_auto_complete';
+    my $update = ( $options->{update} || "$id" ) . '_auto_complete';
     my $function =
-      "new Ajax.Autocompleter( '$id', '$update', '" . $options->{url} . "'";
+      "new Ajax.Autocompleter( '$id', '$update', '"
+      . ( $options->{url} || '' ) . "'";
 
-    my $js_options = {};
+    my $js_options = _options_to_js_options( \%to_options, $options );
     $js_options->{tokens} =
       _array_or_string_for_javascript( $options->{tokens} )
       if $options->{tokens};
     $js_options->{callback} =
       ( 'function ( element, value ) { return ' . $options->{with} . ' }' )
       if $options->{with};
-    $js_options->{indicator} = ( "'" . $options->{indicator} . "'" )
-      if $options->{indicator};
-    $js_options->{select} = ( "'" . $options->{select} . "'" )
-      if $options->{select};
-
-    while ( my ( $key, $js_key ) = each %to_options ) {
-        $js_options->{$js_key} = $options->{$key} if $options->{$key};
-    }
 
     $function .= ', ' . _options_for_javascript($js_options)
       if keys %{$js_options};
@@ -1055,9 +1050,30 @@ sub _options_for_javascript {
     my $options = shift;
     my @options = ();
     while ( my ( $key, $value ) = each %{$options} ) {
-        push @options, "$key: $value";
+        push @options, "$key:$value";
     }
     return '{ ' . join( ', ', sort(@options) ) . ' }';
+}
+
+sub _options_to_js_options {
+    my ( $to_options, $options ) = @_;
+
+    $to_options ||= {};
+    $options    ||= {};
+
+    my $js_options = {};
+    while ( my ( $key, $js_key ) = each %{$to_options} ) {
+        if ( $options->{$key} ) {
+            if ( ref $js_key eq 'SCALAR' ) {
+                $js_options->{ ${$js_key} } = "'" . $options->{$key} . "'";
+            }
+            else {
+                $js_options->{$js_key} = $options->{$key};
+            }
+        }
+    }
+
+    return $js_options;
 }
 
 sub _remote_function {

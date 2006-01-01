@@ -1,5 +1,9 @@
 Revision history for Perl extension HTML::Prototype
 
+1.39  Sat Dec 31 19:07:00 2005
+        - Fixed bug in _options_for_javascript
+        - Added click_to_edit_text option to the in_place_editor options
+
 1.38  Sat Dec 31 05:01:00 2005
         - Added :select option for auto_complete_field that makes it easier
           to only use part of the auto-complete suggestion as the value

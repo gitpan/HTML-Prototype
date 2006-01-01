@@ -94,6 +94,9 @@ DESCRIPTION
         text is displayed while the text is being loaded from the server.
         (default: "Loading...")
 
+        "click_to_edit_text": The text on the click-to-edit link. (default:
+        "click to edit")
+
         "external_control": The id of an external control used to enter edit
         mode.
 
