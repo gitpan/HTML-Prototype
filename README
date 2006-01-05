@@ -104,7 +104,7 @@ DESCRIPTION
         Ajax.Updater)
 
         "with": JavaScript snippet that should return what is to be sent in
-        the Ajax call, "form" is an implicit parameter
+        the Ajax call, "form" and "value" are implicit parameters
 
     $prototype->in_place_editor_field( $object, $method, \%tag_options,
     \%in_place_editor_options )

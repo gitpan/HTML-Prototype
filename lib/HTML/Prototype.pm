@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.39';
+$VERSION = '1.40';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -125,7 +125,7 @@ C<external_control>: The id of an external control used to enter edit mode.
 C<options>: Pass through options to the AJAX call (see prototype's Ajax.Updater)
 
 C<with>: JavaScript snippet that should return what is to be sent in the
-Ajax call, C<form> is an implicit parameter
+Ajax call, C<form> and C<value> are implicit parameters
 
 =cut
 
@@ -153,7 +153,7 @@ sub in_place_editor {
 
     my $js_options = _options_to_js_options( \%to_options, $options );
     $js_options->{callback} =
-      ( 'function ( form ) { return ' . $options->{with} . ' }' )
+      ( 'function ( form, value ) { return ' . $options->{with} . ' }' )
       if $options->{with};
 
     $function .= ',' . _options_for_javascript($js_options)

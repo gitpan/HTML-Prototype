@@ -1,5 +1,9 @@
 Revision history for Perl extension HTML::Prototype
 
+1.40  Thr Jan 05 01:55:00 2005
+        - Added 'value' to the explicit parameter list of in_place_editor
+          callback function
+
 1.39  Sat Dec 31 19:07:00 2005
         - Fixed bug in _options_for_javascript
         - Added click_to_edit_text option to the in_place_editor options
