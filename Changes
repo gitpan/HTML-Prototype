@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::Prototype
 
+1.41  Sun Jan 15 01:27:45 2005
+        - Fixed load_text_url feature in in_place_editor
+
 1.40  Thr Jan 05 01:55:00 2005
         - Added 'value' to the explicit parameter list of in_place_editor
           callback function

@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.40';
+$VERSION = '1.41';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -143,7 +143,7 @@ sub in_place_editor {
         'form_id'            => \'formId',
         'cols'               => 'cols',
         'size'               => 'size',
-        'load_text_url'      => \'loadTextUrl',
+        'load_text_url'      => \'loadTextURL',
         'loading_text'       => \'loadingText',
         'form_class_name'    => \'formClassName',
         'click_to_edit_text' => \'clickToEditText',
