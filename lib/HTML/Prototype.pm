@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.42';
+$VERSION = '1.43';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -328,7 +328,7 @@ sub auto_complete_result {
         push @elements, HTML::Element->new('li')->push_content($item);
     }
 
-    @elements = _unique @elements;
+    @elements = _unique( @elements );
 
     return $self->content_tag( 'ul', \@elements );
 }
@@ -1103,10 +1103,10 @@ sub _remote_function {
     if ( $condition && $confirm ) {
         $function = "if (($condition) && ($confirm)) { $function; }";
     }
-    else if ($condition) {
+    elsif ($condition) {
         $function = "if ($condition) { $function; }";
     }
-    else if ($confirm) {
+    elsif ($confirm) {
         $function = "if ($confirm) { $function; }";
     }
 

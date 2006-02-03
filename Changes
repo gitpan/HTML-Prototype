@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::Prototype
 
+1.43  Dri Feb 03 21:37:00 2006
+        - Fixed borked version 1.42
+
 1.42  Dri Feb 03 21:30:00 2006
         - Fixed Changes dates
         - validate 'entities' key in html_options for as_HTML output
