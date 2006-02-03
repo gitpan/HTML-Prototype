@@ -1,9 +1,14 @@
 Revision history for Perl extension HTML::Prototype
 
-1.41  Sun Jan 15 01:27:45 2005
+1.42  Dri Feb 03 21:30:00 2006
+        - Fixed Changes dates
+        - validate 'entities' key in html_options for as_HTML output
+        - validate 'confirm' key in internal _remote_function
+
+1.41  Sun Jan 15 01:27:45 2006
         - Fixed load_text_url feature in in_place_editor
 
-1.40  Thr Jan 05 01:55:00 2005
+1.40  Thr Jan 05 01:55:00 2006
         - Added 'value' to the explicit parameter list of in_place_editor
           callback function
 

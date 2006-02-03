@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -327,8 +327,10 @@ sub auto_complete_result {
         }
         push @elements, HTML::Element->new('li')->push_content($item);
     }
-    return HTML::Element->new('ul')->push_content( _unique(@elements) )
-      ->as_HTML('<>&');
+
+    @elements = _unique @elements;
+
+    return $self->content_tag( 'ul', \@elements );
 }
 
 =item $prototype->text_field_with_auto_complete($method, [\%tag_options], [\%completion_options])
@@ -633,10 +635,17 @@ Returns a javascript block with opening tag, content and ending tag.
 sub javascript_tag {
     my ( $self, $content, $html_options ) = @_;
     $html_options ||= {};
-    my %html_options = ( type => 'text/javascript', %$html_options );
-    my $tag = HTML::Element->new( 'script', %html_options );
-    $tag->push_content("\n<!--\n$content\n//-->\n");
-    return $tag->as_HTML('<>&');
+    my %html_options =
+      ( type => 'text/javascript', %$html_options, entities => '' );
+
+    # my $tag = HTML::Element->new( 'script', %html_options );
+    # $tag->push_content("\n<!--\n$content\n//-->\n");
+    # return $tag->as_HTML('<>&');
+
+    my $tag_content =
+      $self->content_tag( 'script', "\n<!--\n$content\n//-->\n",
+        \%html_options );
+    return $tag_content;
 }
 
 =item $prototype->link_to_function( $name, $function, \%html_options )
@@ -647,7 +656,7 @@ handler and return false after the fact.
 Examples:
 
     $prototype->link_to_function( "Greeting", "alert('Hello world!') )
-    $prototype->link_to_function( '<img src="really.png"/>', 'do_delete()' )
+    $prototype->link_to_function( '<img src="really.png"/>', 'do_delete()', { entities => '' } )
 
 =cut
 
@@ -1088,8 +1097,19 @@ sub _remote_function {
     $function = "$before; $function " if $before;
     my $after = $options->{after};
     $function = "$function; $after;" if $after;
+
     my $condition = $options->{condition};
-    $function = "if ($condition) { $function; }" if $condition;
+    my $confirm   = $options->{confirm};
+    if ( $condition && $confirm ) {
+        $function = "if (($condition) && ($confirm)) { $function; }";
+    }
+    else if ($condition) {
+        $function = "if ($condition) { $function; }";
+    }
+    else if ($confirm) {
+        $function = "if ($confirm) { $function; }";
+    }
+
     return $function;
 }
 

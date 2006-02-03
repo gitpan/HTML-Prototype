@@ -177,9 +177,13 @@ sub _tag {
 sub _content_tag {
     my ( $self, $name, $content, $html_options ) = @_;
     $html_options ||= {};
+    my $entities =
+      defined $html_options->{entities}
+      ? delete $html_options->{entities}
+      : '<>&';
     my $tag = HTML::Element->new( $name, %$html_options );
-    $tag->push_content($content);
-    return $tag->as_HTML('<>&');
+    $tag->push_content( ref $content eq 'ARRAY' ? @{$content} : $content );
+    return $tag->as_HTML($entities);
 }
 
 =back
