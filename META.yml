@@ -1,6 +1,6 @@
 ---
 name: HTML-Prototype
-version: 1.44
+version: 1.45
 author:
   - |-
     Sascha Kiefer, C<esskar@cpan.org>
@@ -14,7 +14,7 @@ requires:
 provides:
   HTML::Prototype:
     file: lib/HTML/Prototype.pm
-    version: 1.44
+    version: 1.45
   HTML::Prototype::Controls:
     file: lib/HTML/Prototype/Controls.pm
   HTML::Prototype::DragDrop:

@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::Prototype
 
+1.45  Mon May 22 21:31:00 2006
+        - cpan permissions fixed;
+
 1.44  Mon May 22 20:09:00 2006
         - fixed #19403:	visual_effect function includes extra ";"
         - fixed #18636: typo in POD
