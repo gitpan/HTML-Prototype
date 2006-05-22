@@ -1,9 +1,17 @@
 Revision history for Perl extension HTML::Prototype
 
-1.43  Dri Feb 03 21:37:00 2006
+1.44  Mon May 22 20:09:00 2006
+        - fixed #19403:	visual_effect function includes extra ";"
+        - fixed #18636: typo in POD
+        - fixed #17590: form_remote_tag returns wrongly encoded
+          (HTML::Entities::encode_entities) string
+        - fixes #14590: postBody and evalScripts breaks link_to_remote
+        - added tests
+
+1.43  Fri Feb 03 21:37:00 2006
         - Fixed borked version 1.42
 
-1.42  Dri Feb 03 21:30:00 2006
+1.42  Fri Feb 03 21:30:00 2006
         - Fixed Changes dates
         - validate 'entities' key in html_options for as_HTML output
         - validate 'confirm' key in internal _remote_function

@@ -100,8 +100,8 @@ DESCRIPTION
         "external_control": The id of an external control used to enter edit
         mode.
 
-        "options": Pass through options to the AJAX call (see prototype's
-        Ajax.Updater)
+        "ajax_options": Pass through options to the AJAX call (see
+        prototype's Ajax.Updater)
 
         "with": JavaScript snippet that should return what is to be sent in
         the Ajax call, "form" and "value" are implicit parameters
@@ -453,12 +453,12 @@ DESCRIPTION
         callbacks is the same as "link_to_remote".
 
     $prototype->sortable_element( $element_id, \%options )
-        Makes the element with the DOM ID specified by +element_id+ sortable
+        Makes the element with the DOM ID specified by $element_id sortable
         by drag-and-drop and make an Ajax call whenever the sort order has
         changed. By default, the action called gets the serialized sortable
         element as parameters.
 
-        Example: $ptototype->sortable_element( 'my_list', { url =>
+        Example: $prototype->sortable_element( 'my_list', { url =>
         'http://foo.bar/baz' } );
 
         In the example, the action gets a "my_list" array parameter

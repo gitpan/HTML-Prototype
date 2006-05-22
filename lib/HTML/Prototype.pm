@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.43';
+$VERSION = '1.44';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -122,7 +122,7 @@ C<click_to_edit_text>: The text on the click-to-edit link. (default: "click to e
 
 C<external_control>: The id of an external control used to enter edit mode.
 
-C<options>: Pass through options to the AJAX call (see prototype's Ajax.Updater)
+C<ajax_options>: Pass through options to the AJAX call (see prototype's Ajax.Updater)
 
 C<with>: JavaScript snippet that should return what is to be sent in the
 Ajax call, C<form> and C<value> are implicit parameters
@@ -839,13 +839,13 @@ new PeriodicalExecuter( function () { $code }, $frequency );
 
 =item $prototype->sortable_element( $element_id, \%options )
 
-Makes the element with the DOM ID specified by +element_id+ sortable
+Makes the element with the DOM ID specified by C<$element_id> sortable
 by drag-and-drop and make an Ajax call whenever the sort order has
 changed. By default, the action called gets the serialized sortable
 element as parameters.
 
 Example:
-    $ptototype->sortable_element( 'my_list', { url => 'http://foo.bar/baz' } );
+    $prototype->sortable_element( 'my_list', { url => 'http://foo.bar/baz' } );
 
 In the example, the action gets a "my_list" array parameter
 containing the values of the ids of elements the sortable consists
@@ -993,7 +993,7 @@ sub visual_effect {
     $js_options ||= {};
     $name = ucfirst $name;
     my $options = _options_for_javascript($js_options);
-    return "new Effect.$name( '$element_id', $options );";
+    return "new Effect.$name( '$element_id', $options )";
 }
 
 sub _build_callbacks {

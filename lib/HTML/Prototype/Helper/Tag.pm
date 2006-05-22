@@ -5,6 +5,8 @@ use base qw/Class::Accessor::Fast/;
 __PACKAGE__->mk_accessors(
     qw/object object_name method_name template_object local_binding auto_index/
 );
+use vars qw/$USE_ASXML_FOR_TAG/;
+$USE_ASXML_FOR_TAG = 0;
 
 =head1 NAME
 
@@ -17,6 +19,13 @@ HTML::Prototype::Helper::Tag - Defines a tag object needed by HTML::Prototype
 =head1 DESCRIPTION
 
 Defines a tag object needed by HTML::Prototype
+
+=head2 REMARKS
+
+Until version 1.43, the internal function I<$self->_tag> used I<$tag->as_XML>
+as its return value. By now, it will use I<$tag->as_HTML( $entities )> to
+invokee I<HTML::Entities::encode_entities>. This behaviour can be overridden
+by setting I<$HTML::Prototype::Helper::Tag::USE_ASXML_FOR_TAG> to 1.
 
 =head2 METHODS
 
@@ -169,9 +178,20 @@ sub _tag {
     my ( $self, $name, $options, $starttag ) = @_;
     $starttag ||= 0;
     $options  ||= {};
+    my $entities =
+      defined $options->{entities}
+      ? delete $options->{entities}
+      : '<>&';
     my $tag = HTML::Element->new( $name, %$options );
-    return $tag->starttag if $starttag;
-    return $tag->as_XML;
+    if ($starttag) {
+        return $tag->starttag($entities);
+    }
+    elsif ($USE_ASXML_FOR_TAG) {
+        return $tag->as_XML;
+    }
+    else {
+        $tag->as_HTML($entities);
+    }
 }
 
 sub _content_tag {
