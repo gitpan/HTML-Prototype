@@ -1,5 +1,7 @@
 package HTML::Prototype::Js;
 
+use strict;
+
 1;
 
 =head1 NAME

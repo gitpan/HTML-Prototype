@@ -1,5 +1,7 @@
 package HTML::Prototype::Effects;
 
+use strict;
+
 1;
 
 =head1 NAME
@@ -910,7 +912,7 @@ Effect.Pulsate = function(element) {
   var transition = options.transition || Effect.Transitions.sinoidal;
   var reverser   = function(pos){ return transition(1-Effect.Transitions.pulse(pos)) };
   reverser.bind(transition);
-  return new Effect.Opacity(element, 
+  return new Effect.Opacity(element,
     Object.extend(Object.extend({  duration: 3.0, from: 0,
       afterFinishInternal: function(effect) { Element.setStyle(effect.element, {opacity: oldOpacity}); }
     }, options), {transition: reverser}));

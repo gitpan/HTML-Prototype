@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.45';
+$VERSION = '1.47';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -13,10 +13,17 @@ use HTML::Prototype::DragDrop;
 use HTML::Prototype::Effects;
 use HTML::Prototype::Helper;
 
-$prototype = do { package HTML::Prototype::Js;       local $/; <DATA> };
-$controls  = do { package HTML::Prototype::Controls; local $/; <DATA> };
-$dragdrop  = do { package HTML::Prototype::DragDrop; local $/; <DATA> };
-$effects   = do { package HTML::Prototype::Effects;  local $/; <DATA> };
+{
+    local $/;
+    $prototype = <HTML::Prototype::Js::DATA>;
+    close HTML::Prototype::Js::DATA;
+    $controls = <HTML::Prototype::Controls::DATA>;
+    close HTML::Prototype::Controls::DATA;
+    $dragdrop = <HTML::Prototype::DragDrop::DATA>;
+    close HTML::Prototype::DragDrop::DATA;
+    $effects = <HTML::Prototype::Effects::DATA>;
+    close HTML::Prototype::Effects::DATA;
+}
 
 my $callbacks    = [qw/uninitialized loading loaded interactive complete/];
 my $ajax_options = [qw/url asynchronous method insertion form with/];
@@ -328,7 +335,7 @@ sub auto_complete_result {
         push @elements, HTML::Element->new('li')->push_content($item);
     }
 
-    @elements = _unique( @elements );
+    @elements = _unique(@elements);
 
     return $self->content_tag( 'ul', \@elements );
 }

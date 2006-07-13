@@ -1,5 +1,12 @@
 Revision history for Perl extension HTML::Prototype
 
+1.47  Mon Jul 14 01:57:12 2006
+        - use strict added
+        - DATA handles closed
+
+1.46  Mon May 22 22:03:00 2006
+        - cpan permissions fixed;
+
 1.45  Mon May 22 21:31:00 2006
         - cpan permissions fixed;
 
