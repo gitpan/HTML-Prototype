@@ -4,7 +4,7 @@ use strict;
 use base qw/Class::Accessor::Fast/;
 use vars qw/$VERSION $prototype $controls $dragdrop $effects/;
 
-$VERSION = '1.47';
+$VERSION = '1.48';
 
 use HTML::Element;
 use HTML::Prototype::Js;
@@ -281,7 +281,7 @@ sub auto_complete_field {
     my %to_options = (
         'on_show'   => 'onShow',
         'on_hide'   => 'onHide',
-        'min_chars' => 'min_chars',
+        'min_chars' => 'minChars',
         'indicator' => \'indicator',
         'select'    => \'select',
     );

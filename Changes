@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::Prototype
 
+1.48  Fri Sep 22 20:14:16 2006
+        - fixed auto_complete_field bug: s/min_chars/minChars
+
 1.47  Mon Jul 14 01:57:12 2006
         - use strict added
         - DATA handles closed
